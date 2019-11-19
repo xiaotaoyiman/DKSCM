@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+		"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.ekgc.dkscm.dao.PurchaseDao">
+	<select id="findPurchaseListByPage" parameterType="java.util.Map" resultMap="purchaseMap">
+		SELECT 
+			sp.purchaser_id,
+			sp.purchase_no,
+			sp.goods_name,
+			sp.goods_band,
+			sp.goods_type,
+			sp.apply_quantity,
+			sp.goods_unit,
+			sp.budget,
+			sp.apply_remark,
+			sp.apply_time,
+			su1.user_id apply_id,
+			su1.username apply_name
+		FROM
+			sys_purchase sp LEFT JOIN sys_user su1 ON sp.applicant_id=su1.user_id
+			LEFT JOIN sys_user su2 ON sp.reviewer_id=su2.user_id
+			LEFT JOIN sys_user su3 ON sp.purchaser_id=su3.user_id
+			LEFT JOIN sys_user su4 ON sp.store_reviewer_id=su4.user_id
+			LEFT JOIN sys_user su5 ON sp.storeman=su5.user_id
+			LEFT JOIN sys_user su6 ON sp.receiver_id=su6.user_id
+			JOIN sys_status ss ON sp.status_code=ss.status_code
+		<trim suffixOverrides="and">
+			<where>
+				<if test="statusCode != null">sp.status_code=#{statusCode} and</if>
+			</where>
+		</trim>
+		order by sp.apply_time desc
+		<if test="begin != null">limit #{begin}, #{size}</if>
+	</select>
+	<resultMap type="Purchase" id="purchaseMap">
+		<id property="purchaseId" javaType="java.lang.Long" column="purchaser_id"/>
+		<result property="purchaseNo" javaType="java.lang.String" column="purchase_no"/>
+		<result property="goodsName" javaType="java.lang.String" column="goods_name"/>
+		<result property="goodsBand" javaType="java.lang.String" column="goods_band"/>
+		<result property="goodsType" javaType="java.lang.String" column="goods_type"/>
+		<result property="applyQuantity" javaType="java.lang.Double" column="apply_quantity"/>
+		<result property="applyUnit" javaType="java.lang.String" column="goods_unit"/>
+		<result property="budget" javaType="java.lang.Double" column="budget"/>
+		<result property="applyRemark" javaType="java.lang.Double" column="apply_remark"/>
+		<result property="applyTime" javaType="java.util.Date" column="apply_time"/>
+		<association property="Applier" javaType="User">
+			<id property="userId" javaType="java.lang.Long" column="apply_id"/>
+			<result property="username" javaType="java.lang.String" column="apply_name"/>
+		</association>
+	</resultMap>
+</mapper>

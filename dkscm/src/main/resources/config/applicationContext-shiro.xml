@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xsi:schemaLocation="http://www.springframework.org/schema/beans
+							http://www.springframework.org/schema/beans/spring-beans.xsd">
+	<!-- 配置通知Shiro在进行安全认证的时候，调用哪种规则 [BEGIN] -->
+	<!-- 对于Shiro来说，有一个核心对象就是SecurityManager -->
+	<bean id="securityManager" class="org.apache.shiro.web.mgt.DefaultWebSecurityManager">
+		<!-- 将我们具体的安全认证规则告知核心对象SecurityManager -->
+		<property name="realm" ref="shiroDBRealm"/>
+	</bean>
+	<!-- 配置通知Shiro在进行安全认证的时候，调用哪种规则 [END] -->
+	
+	<!-- 对于整个系统来说，需要设定哪些需要进行认证，哪些不需要 [BEGIN] -->
+	<bean id="shiroFilter" class="org.apache.shiro.spring.web.ShiroFilterFactoryBean">
+		<!-- 设定Shiro核心管理者SecurityManager -->
+		<property name="securityManager" ref="securityManager"/>
+		<!-- 当用户需要进行认证登录的时候，跳转的登录页面地址 -->
+		<!-- Shiro认为，登陆请求和重定向到登陆界面的请求一致，不过使用请求方式进行区分 -->
+		<property name="loginUrl" value="/user/login"/>
+		<!-- 认证成功之后，如果之前没有请求的路径，那么重定向到该路径 -->
+		<property name="successUrl" value="/"/>
+		<!-- 配置系统认证规则 -->
+		<property name="filterChainDefinitions">
+			<value>
+				<!-- 对于Shiro来说，内置了安全认证规则，该规则的校验从上到下 -->
+				<!-- 配置不需要进行校验的请求 -->
+				/static/** = anon
+				<!-- 对于系统的退出功能，Shiro提供了相应的规则 -->
+				/user/logout = logout
+				<!-- 对于需要校验的请求，则使用规则authc -->
+				/** = authc
+			</value>
+		</property>
+	</bean>
+	<!-- 对于整个系统来说，需要设定哪些需要进行认证，哪些不需要 [END] -->
+	
+	<!-- 配置Shiro使用自己的生命周期 [BEGIN] -->
+	<bean id="lifecycleBean" class="org.apache.shiro.spring.LifecycleBeanPostProcessor"/>
+	<!-- 配置Shiro使用自己的生命周期 [END] -->
+</beans>
